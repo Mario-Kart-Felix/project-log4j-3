@@ -1,0 +1,28 @@
+Log4j 2 Javadoc API Documentation and TLD Documentation
+Javadoc API Documentation
+The table below contains links to the Javadoc API Documentation for the components you are most likely to use directly in code. You can also use the menu links on the left.
+
+Component	Description
+Log4j 2 API	The interface that applications should use and code against.
+Implementation	The standard implementation, also called the Log4j 2 Core, that contains Appenders, Filters, and more.
+Log4j IO Streams	Extra classes for dealing with older APIs that expect classes from java.io for logging.
+JSP Tag Library	The tag library that enables Java-free logging in JavaServer Pages™ using Log4j 2.
+JSP Tag Library (TLD Doc)	The special Javadoc-like Tag Library Documentation for the Log4j 2 JSP Tag Library.
+The table below contains links to the Javadoc API Documentation for all the other Log4j 2 components, which you likely will not use directly in code but instead will only configure or include in your dependencies.
+
+Component	Description
+Commons Logging Bridge	A bridge that permits applications written against the Apache Commons Logging API to log using Log4j 2.
+SLF4J Binding	A bridge that permits applications written against the SLF4J API to log using Log4j 2.
+Java Util Logging Adapter	A bridge that permits applications written against the java.util.logging API to log using Log4j 2.
+Log4j 1.2 API Bridge	A bridge that permits applications written against the Log4j 1.2.x API to log using Log4j 2.
+Log4j 2 to SLF4J Adapter	An adapter that permits applications written against the Log4j 2 API to log using SLF4J.
+Apache Flume Appender	An Appender that allows applications to send logging events to Apache Flume Agents.
+Log4j JMX GUI	A Java Swing-based client for remotely viewing the status logger and editing the Log4j configuration.
+Log4j JPA	Apache Log4j Java Persistence API Appender.
+Log4j Web Application Support	Additional classes that enable multiple configurations within a Servlet Container.
+Log4j CouchDB Support	Additional Appender for CouchDB.
+Log4j JDBC DBCP 2	Connection source for the JDBC Appender using Apache Commons DBCP2.
+Log4j Liquibase Binding	The Apache Log4j Liquibase binding to Log4j 2 Core.
+Log4j MongoDB 3 Support	Additional Appender for MongoDB using the version 3 driver.
+Log4j MongoDB 4 Support	Additional Appender for MongoDB using the version 4 driver.
+Log4j Cassandra Support	Additional Appender
