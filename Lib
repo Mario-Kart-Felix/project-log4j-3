@@ -1,0 +1,36 @@
+Package org.apache.logging.log4j.taglib
+Classes (JSP tags) to enable logging in JSPs without using Java scripting.
+See: Description
+
+Class Summary
+Class	Description
+CatchingTag	
+This class implements the <log:catching> tag.
+DebugTag	
+This class implements the <log:debug> tag.
+DumpTag	
+This class implements the <log:dump> tag.
+EntryTag	
+This class implements the <log:entry> tag.
+ErrorTag	
+This class implements the <log:error> tag.
+ExitTag	
+This class implements the <log:exit> tag.
+FatalTag	
+This class implements the <log:fatal> tag.
+IfEnabledTag	
+This class implements the <log:ifEnabled> tag.
+InfoTag	
+This class implements the <log:info> tag.
+LogTag	
+This class implements the <log:log> tag.
+SetLoggerTag	
+This class implements the <log:setLogger> tag.
+TraceTag	
+This class implements the <log:trace> tag.
+WarnTag	
+This class implements the <log:warn> tag.
+Package org.apache.logging.log4j.taglib Description
+Classes (JSP tags) to enable logging in JSPs without using Java scripting.
+Since:
+2.0
