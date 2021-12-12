@@ -1,0 +1,12 @@
+Release Changelog
+JIRA-generated changelog
+
+Manual change log
+
+Apache Log4j 3 is not compatible with the previous versions. Please have the following in mind when upgrading to Log4j 3 in your project:
+
+Log4j 3.4 and greater requires Java 9, versions 3.0-alpha1 to 3.3 required Java 9.
+The XML configuration has been simplified and is not compatible with Log4j 2.x.
+Configuration via property files is supported from version 3.4, but is not compatible with Log4j 2.x.
+Configuration via JSON or YAML is supported, but these formats require additional runtime dependencies.
+Although Log4j 2 is not directly compatible with Log4j 3.x a compatibility bridge has been provided to reduce the need to make coding changes.
