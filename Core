@@ -1,0 +1,102 @@
+Apache Log4j Core 2.15.0 API
+Core API
+Package	Description
+org.apache.logging.log4j.core	
+Implementation of Log4j 2.
+Configuration
+Package	Description
+org.apache.logging.log4j.core.config	
+Configuration of Log4j 2.
+org.apache.logging.log4j.core.config.arbiters	 
+org.apache.logging.log4j.core.config.builder.api	
+Configuration Builder API for programmatically configuring Log4j.
+org.apache.logging.log4j.core.config.builder.impl	
+Configuration Builder Implementation.
+org.apache.logging.log4j.core.config.composite	
+Support for composite configurations.
+org.apache.logging.log4j.core.config.json	
+Classes and interfaces supporting configuration of Log4j 2 with JSON.
+org.apache.logging.log4j.core.config.plugins	
+Annotations for Log4j 2 plugins.
+org.apache.logging.log4j.core.config.plugins.convert	
+TypeConverter plugins for converter strings into various types.
+org.apache.logging.log4j.core.config.plugins.processor	
+Java annotation processor for pre-scanning Log4j 2 plugins.
+org.apache.logging.log4j.core.config.plugins.util	
+Utility and manager classes for Log4j 2 plugins.
+org.apache.logging.log4j.core.config.plugins.validation	
+Constraint validators for plugin factory methods.
+org.apache.logging.log4j.core.config.plugins.validation.constraints	
+Validation annotations.
+org.apache.logging.log4j.core.config.plugins.validation.validators	
+ConstraintValidator implementations for the constraint annotations.
+org.apache.logging.log4j.core.config.plugins.visitors	
+Visitor classes for extracting values from a Configuration or Node corresponding to a plugin annotation.
+org.apache.logging.log4j.core.config.properties	
+Configuration using Properties files.
+org.apache.logging.log4j.core.config.status	
+Configuration classes for the StatusLogger API.
+org.apache.logging.log4j.core.config.xml	
+Classes and interfaces supporting configuration of Log4j 2 with XML.
+org.apache.logging.log4j.core.config.yaml	
+Classes and interfaces supporting configuration of Log4j 2 with YAML.
+org.apache.logging.log4j.core.selector	
+Log4j 2 Context Selectors.
+Core Plugins
+Package	Description
+org.apache.logging.log4j.core.appender	
+Log4j 2 Appenders.
+org.apache.logging.log4j.core.appender.db	
+The classes in this package and sub packages provide appenders for various types of databases and methods for accessing databases.
+org.apache.logging.log4j.core.appender.db.jdbc	
+The JDBC Appender supports writing log events to a relational database using standard JDBC connections.
+org.apache.logging.log4j.core.appender.mom	
+Message oriented middleware appenders.
+org.apache.logging.log4j.core.appender.mom.jeromq	
+Classes and interfaces for ZeroMQ/JeroMQ support.
+org.apache.logging.log4j.core.appender.mom.kafka	
+Classes and interfaces for Kafka appender support.
+org.apache.logging.log4j.core.appender.nosql	
+The NoSQL Appender supports writing log events to NoSQL databases.
+org.apache.logging.log4j.core.appender.rewrite	
+Apache Flume Appender.
+org.apache.logging.log4j.core.appender.rolling	
+Rolling File Appender and support classes.
+org.apache.logging.log4j.core.appender.rolling.action	
+Support classes for the Rolling File Appender.
+org.apache.logging.log4j.core.appender.routing	
+Apache Flume Appender.
+org.apache.logging.log4j.core.filter	
+Log4j 2 Filter support.
+org.apache.logging.log4j.core.layout	
+Log4j 2 Layout support.
+org.apache.logging.log4j.core.lookup	
+Log4j 2 Lookups.
+org.apache.logging.log4j.core.pattern	
+Provides classes implementing format specifiers in conversion patterns.
+org.apache.logging.log4j.core.script	
+Log4j 2 Script support.
+Tools
+Package	Description
+org.apache.logging.log4j.core.net	
+Log4j 2 network support.
+org.apache.logging.log4j.core.net.ssl	
+Log4j 2 SSL support
+org.apache.logging.log4j.core.tools	
+Log4j 2 command line tools.
+Internals
+Package	Description
+org.apache.logging.log4j.core.async	
+Provides Asynchronous Logger classes and interfaces for low-latency logging.
+org.apache.logging.log4j.core.impl	
+Log4j 2 private implementation classes.
+org.apache.logging.log4j.core.jackson	
+Classes and interfaces for serializing and deserializing Log4j 2 log events to XML and JSON using the Jackson library.
+org.apache.logging.log4j.core.jmx	
+Log4j 2 JMX support.
+org.apache.logging.log4j.core.osgi	
+Collection of OSGi-specific classes for bundles.
+org.apache.logging.log4j.core.util	
+Log4j 2 helper classes.
+org.apache.logging.log4j.core.util.datetime	
+Log4j 2 date formatting classes.
