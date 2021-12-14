@@ -1,0 +1,195 @@
+TypeScript Express tutorial #15. Using PUT vs PATCH in MongoDB with Mongoose
+April 27, 2020
+This entry is part 15 of 15 in the TypeScript Express tutorial
+1. TypeScript Express tutorial #1. Middleware, routing, and controllers
+2. TypeScript Express tutorial #2. MongoDB, models and environment variables
+3. TypeScript Express tutorial #3. Error handling and validating incoming data
+4. TypeScript Express tutorial #4. Registering users and authenticating with JWT
+5. TypeScript Express tutorial #5. MongoDB relationships between documents
+6. TypeScript Express tutorial #6. Basic data processing with MongoDB aggregation
+7. TypeScript Express tutorial #7. Relational databases with Postgres and TypeORM
+8. TypeScript Express tutorial #8. Types of relationships with Postgres and TypeORM
+9. TypeScript Express tutorial #9. The basics of migrations using TypeORM and Postgres
+10. TypeScript Express tutorial #10. Testing Express applications
+11. TypeScript Express tutorial #11. Node.js Two-Factor Authentication
+12. TypeScript Express tutorial #12. Creating a CI/CD pipeline with Travis and Heroku
+13. TypeScript Express tutorial #13. Using Mongoose virtuals to populate documents
+14. TypeScript Express tutorial #14. Code optimization with Mongoose Lean Queries
+15. TypeScript Express tutorial #15. Using PUT vs PATCH in MongoDB with Mongoose
+When we develop a REST API, we have a set of HTTP methods that we can choose. An important thing to understand is that HTTP methods are, to a large extent, indicators of actions. Therefore, it is our job to make them work properly. In theory, not much stops us, for example, from deleting entities with the GET method. By caring about keeping conventions, we improve the readability of our API and make it predictable.
+
+Most of the HTTP methods are rather straightforward. Although, in Mongoose with Express, PUT and PATCH methods might cause some misinterpretation. In this article, we compare them both and inspect how to implement them both in MongoDB with Mongoose.
+
+This series of articles results in this repository. Feel free to give it a star.
+
+PUT
+The PUT method is in the HTTP protocol for quite a while now. Its main responsibility is to modify an existing entity.
+
+The most important thing about PUT is that it replaces an entity. If we don’t include a property that an entity contains, it should be removed
+
+GET /posts/5cf96275ff8ecf065c510468
+{
+  "_id": "5cf96275ff8ecf065c510468",
+  "title": "Lorem ipsum",
+  "content": "Dolor sit amet",
+  "author": "5cf96217ff8ecf065c510467",
+}
+As you can see above, the post contains quite a few properties. Let’s send an example of a PUT request:
+
+PUT /posts/5cf96275ff8ecf065c510468
+{
+  "_id": "5cf96275ff8ecf065c510468",
+  "title": "A brand new title",
+  "content": "Dolor sit amet",
+  "author": "5cf96217ff8ecf065c510467",
+}
+As you can see, we’ve changed the  title property. We’ve also included all other fields, such as the  content and the  author. Let’s send another PUT request:
+
+PUT /posts/5cf96275ff8ecf065c510468
+
+{
+  "content": "A brand new content"
+}
+This request should remove all of the other properties and leave only  content.
+
+Using PUT with MongoDB and Mongoose
+The above is not precisely the case with MongoDB and Mongoose. It does not let us remove or change the  _id.
+
+To implement a proper PUT with MongoDB and Mongoose, we need a way to replace a document instead of updating it. One of the most commonly used ways to modify an entity are  findByIdAndUpdate and  findOneAndUpdate. Unfortunately, their default behavior is not to replace the document, but perform a partial update on it. Therefore, if we don’t pass a property, it does not remove it from the entity.
+
+One way to achieve the desired behavior is to use the  replaceOne method. As the name suggests, it replaces the whole document – just what we need.
+
+The result of the  replaceOne method contains the  n  property that describes the number of documents matching our filter. If none were found, we could assume that an entity with a given id does not exist.
+
+Unfortunately, the result does not contain the modified document, so we would need to look it up using the  findById function to send it back.
+
+private initializeRoutes() {
+  this.router.put(`${this.path}/:id`, this.modifyPost)
+}
+private modifyPost = async (request: Request, response: Response, next: NextFunction) => {
+  const id = request.params.id;
+  const postData: Post = request.body;
+  const modificationResult = await this.post.replaceOne({ _id: id }, postData);
+  if (modificationResult.n) {
+    const modifiedPost = await this.post.findById(id);
+    response.send(modifiedPost);
+  } else {
+    next(new PostNotFoundException(id));
+  }
+}
+The above difficulties might be solved using the  findOneAndReplace function. Unfortunately, the  @types/mongoose package lacks the TypeScript definition of the  findOneAndReplace method.
+
+There were some efforts made to add it, though. If it is ever finalized, I will update this article.
+
+Although the documentation currently does not mention that, we can also pass the  overwrite: true option to  findByIdAndUpdate and  findOneAndUpdate. Thanks to that, it will replace a whole document instead of performing a partial update.
+
+private modifyPost = async (request: Request, response: Response, next: NextFunction) => {
+  const id = request.params.id;
+  const postData: Post = request.body;
+  const post = await this.post.findByIdAndUpdate(id, postData).setOptions({ new: true, overwrite: true });
+  if (post) {
+    response.send(post);
+  } else {
+    next(new PostNotFoundException(id));
+  }
+}
+Creating new entities with PUT
+The specification also mentions that we could use PUT to create a new entity if the desired one wasn’t found. We refer to this behavior as an upsert.
+
+Mongoose supports it by allowing us to pass the upsert option to the  replaceOne query.
+
+private modifyPost = async (request: Request, response: Response, next: NextFunction) => {
+  const id = request.params.id;
+  const postData: Post = request.body;
+  const modificationResult = await this.post.replaceOne({ _id: id }, postData).setOptions({
+    upsert: true
+  });
+  if (modificationResult.n) {
+    const resultId = modificationResult.upserted?.[0]?._id || id;
+    const modifiedPost = await this.post.findById(resultId);
+    response.send(modifiedPost);
+  } else {
+    next(new PostNotFoundException(id));
+  }
+}
+If there is an element in the  modificationResult.upserted array, we look for an entity with a new id. Otherwise, we use the identifier provided by the user.
+
+PATCH
+The PUT method might not always be the best choice for updating entities. It assumes that users know all of the details of a particular entity, but this is not always the case. A solution to that might be the PATCH method.
+
+PATCH was introduced to the HTTP protocol in 2010 within RFC 5789. It aims to apply a partial modification to a resource. We should treat PATCH as a set of instructions on how to modify a resource.
+
+The most straightforward way to implement a handler for a PATCH method is to expect a body with a partial entity.
+
+PATCH /posts/5cf96275ff8ecf065c510468
+
+{
+  "content": "A brand new content"
+}
+The above should modify the entity with new  content. As opposed to PUT, we should not remove the rest of the properties.
+
+Using PATCH with MongoDB and Mongoose
+The  findByIdAndUpdate method is very much fitting to implement the PATCH method. We mention it in the second part of this series.
+
+private initializeRoutes() {
+  this.router.patch(`${this.path}/:id`, this.modifyPost)
+}
+private modifyPost = async (request: Request, response: Response, next: NextFunction) => {
+  const id = request.params.id;
+  const postData: Post = request.body;
+  const post = await this.post.findByIdAndUpdate(id, postData, { new: true });
+  if (post) {
+    response.send(post);
+  } else {
+    next(new PostNotFoundException(id));
+  }
+}
+Thanks to passing the  new: true option, our query results in an updated version of the entity. Thanks to that, we can send it back in the response effortlessly.
+
+If in the data passed to the  findByIdAndUpdate function, we include a different  _id, Mongoose throws an error.
+
+If we want to remove properties when performing a PATCH with  findByIdAndUpdate, we would have to send null explicitly.
+
+JSON Patch
+Another approach to implementing the PATCH method is to literally send a set of instructions on how to modify a resource. You can use the JSON Patch format that defines an array of patch operations.
+
+PATCH /posts/5cf96275ff8ecf065c510468
+[
+  { 
+    "op": "replace",
+    "path": "/content",
+    "value": "A brand new content"
+  }
+]
+We can find the documentation on the JSON Patch format here. There is also the fast-json-patch utility that might help you create and read such patches.
+
+Summary
+In this article, we’ve gone through possible ways to implement the update functionality. When choosing between PUT and PATCH, we need to consider what is the best choice in your particular case. No matter what we decide on, once we decide on one of the approaches, we need to code them properly. When doing so, we need to consider how are the PATCH and PUT methods defined in the specification and implement them accordingly.
+
+Series Navigation
+<< TypeScript Expressions
+Comparing the HashRouter and the BrowserRouter in React applications
+Using React components written in JavaScript within TypeScript code
+API with NestJS #33. Managing PostgreSQL relationships with Prisma
+API with NestJS #32. Introduction to Prisma with PostgreSQL
+Time intervals with PostgreSQL and TypeORM
+SERIES
+API with NestJS
+Getting geeky with Git
+JavaScript design patterns
+JavaScript testing tutorial
+Node.js TypeScript
+React SSR with Next.js
+Regex course
+TypeScript Express tutorial
+Webpack 4 course
+PREVIOUS ARTICLE
+TypeScript Express tutorial #14. Code optimization with Mongoose Lean Queries
+
+NEXT ARTICLE
+Getting geeky with Git #3. The branch is a reference
+
+©
+
+Marcin Wanago
+2021
