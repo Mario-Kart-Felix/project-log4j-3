@@ -1,0 +1,3 @@
+get rid of the old inputformats and recordreaders in favor of the ones in hadoop-pcap
+
+Add a LogHolder object that can be used for log4j logging.
