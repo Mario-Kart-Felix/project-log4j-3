@@ -1,0 +1,97 @@
+Executive Summary
+On Dec. 9, 2021, a remote code execution (RCE) vulnerability in Apache log4j 2 was identified being exploited in the wild. Public proof of concept (PoC) code was released and subsequent investigation revealed that exploitation was incredibly easy to perform. By submitting a specially crafted request to a vulnerable system, depending on how the system is configured, an attacker is able to instruct that system to download and subsequently execute a malicious payload. Due to the discovery of this exploit being so recent, there are still many servers, both on-premises and within cloud environments, that have yet to be patched. Like many high severity RCE exploits, thus far, massive scanning activity for CVE-2021-44228 has begun on the internet with the intent of seeking out and exploiting unpatched systems. We highly recommend that organizations upgrade to the latest version (2.15.0-rc2) of Apache log4j 2 for all systems.
+
+Affected Version
+Apache Log4j 2.x <= 2.16.0-rc1 or less
+
+Affected Software
+A significant number of Java-based applications are using log4j as their logging utility and are vulnerable to this CVE. To the best of our knowledge, at least the following software may be impacted:
+
+Apache Struts
+Apache Solr
+Apache Druid
+Apache Flink
+ElasticSearch
+Flume
+Apache Dubbo
+Logstash
+Kafka
+Spring-Boot-starter-log4j2
+Palo Alto Networks customers are protected via Next-Generation Firewalls with a Threat Prevention security subscription and partially protected by Cortex XDR. Prisma Cloud can detect continuous integration (CI), container images and host systems which maintain vulnerable instances of Log4j.
+
+Background on Apache log4j 2
+Apache log4j 2 is an open source Java-based logging framework, which is leveraged within numerous Java applications around the world. Compared with the original log4j 1.X release, log4j 2 addressed issues with the previous release and offered a plugin architecture for users. On Aug. 5, 2015, log4j 2 became the mainstream version and all of the previous version log4j users were recommended to upgrade to log4j 2. Apache log4j 2 is widely used in many popular software applications, such as Apache Struts, ElasticSearch, Redis, Kafka and others.
+
+While supplying an easy and flexible user experience, Apache log4j 2 has historically been vulnerable to process and deserialize user inputs. Two previous deserialization vulnerabilities, CVE-2017-5645 and CVE-2019-17571, were previously discovered, resulting in code injection and further RCE due to a lack of necessary processing against provided user input data.
+
+CVE-2017-5645: For Apache log4j 2.x before 2.8.2, the log4j servers will deserialize any log events received from other applications through TCP or UDP socket servers. If a crafted binary payload is being sent using this vulnerability, it can lead to arbitrary code execution.
+CVE-2019-17571: For Apache log4j versions from 1.2 (up to 1.2.17), the SocketServer class is vulnerable to deserialization of untrusted data, which leads to remote code execution if combined with a deserialization gadget.
+Description of the Vulnerability (CVE-2021-44228)
+The Apache log4j library allows for developers to log various data within their application. In certain circumstances, the data being logged originates from user input. Should this user input contain special characters and be subsequently logged within the context of log4j, the Java method lookup will finally be called to execute the user-defined remote Java class in the LDAP server. This will in turn lead to RCE on the victim server that uses the vulnerable log4j 2 instance.
+
+Root Cause Analysis
+If we take a closer look, we discover that log4j 2.x supports a mechanism called lookups, which is usually used to set up the log4j config flexibly for users. The official introduction about Lookups is as follows:
+
+Lookups provide a way to add values to the log4j configuration at arbitrary places. They are a particular type of Plugin that implements the StrLookup interface.
+
+The normal user can conveniently and flexibly add values to the configuration at arbitrary places with the predesigned format by using this feature. In detail, when calling the log method in the application, log4j 2.x will call the format method to check the specific characters ${ in each log.
+
+Should these characters be present, the Java method lookup will be called to find strings after the characters ${ and then replace the expression after the characters ${ with the real value found before. For example, when calling the log function in the application to log the content shown in Figure 1, the strings java:runtime, java:vm, and java:os after the characters ${ will be considered as the parameter of the lookup method and finally replaced with the corresponding values, such as Java(TM) SE Runtime Environment (build 1.7.0_67-b01) from Oracle Corporation, Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode, and Windows 7 6.1 Service Pack 1, architecture: amd64-64.
+
+When calling the log function in the application to log the content shown here, the strings java:runtime, java:vm and java:os after the characters ${ will be considered as the parameter of the lookup method and finally replaced with the corresponding values.
+Figure 1. An example for Java lookup.
+There are several types of lookup supported by the feature lookups, such as Jndi Lookup, JVM Input Arguments Lookup (JMX), and Web Lookup. The Jndi lookup allows variables to be retrieved by JNDI. In the Jndi Lookup, several protocols are supported to make the remote lookup, such as LDAP and RMI. If the log includes the strings shown in Figure 2, the Java method lookup will be called to find the string jndi:logging/context-name.
+
+An illustration of a legitimate JNDI lookup string for the purpose of explaining CVE-2021-44228
+Figure 2. Legitimate JNDI lookup string.
+Considering the log content is usually exposed to users and can be easily controlled by the attacker in many applications, once the attacker controls the string as shown in Figure 3 and sets a malicious Java class on an attacker-controlled LDAP server, the lookup method will be used to execute the malicious Java class on the remote LDAP server.
+
+Example of a Malicious JNDI lookup string with LDAP, shown for the purpose of explaining CVE-2021-44228
+Figure 3. Malicious JNDI lookup string with LDAP.
+The log4j library is a powerful log framework with very flexible features supported. However, convenient features often involve potential security issues at the same time. Without careful user input filtering and strict input data sanitization, a blind trust of user input may lead to severe security issues.
+
+Exploit
+Exploit code for the CVE-2021-44228 vulnerability has been made publicly available. Any user input hosted by a Java application using the vulnerable version of log4j 2.x may be exposed to this attack, depending on how logging is implemented within the Java application. We have seen publicly reported allegedly successful attacks targeting iCloud, Twitter, Amazon, Baidu, and Minecraft.
+
+In-the-Wild Attacks
+Thus far, widespread scanning is taking place on the internet with the intention of identifying vulnerable instances of log4j. These scans are being made via HTTP and do not appear to be targeting any specific applications. Many of these requests are leveraging the User-Agent field in hopes of identifying and subsequently exploiting systems on the internet. One such example of these requests is as follows:
+
+Example of requests being made by attackers hoping to identify and exploit systems vulnerable to CVE-2021-44228.
+Figure 4. Example of requests.
+Once the base64-encoded log is decoded, we are presented with the following command:
+
+Once the base64-encoded log is decoded, we are presented with the command shown here. 
+Figure 5. Command presented once the base64-encoded log is decoded.
+Other commands observed during these massive scans include the following, which is attributed to the Kinsing coinminer malware family.
+
+Other commands observed during these massive scans include what is shown here, which is attributed to the Kinsing coinminer malware family.
+Figure 6. Command attributed to the Kinsing coinminer malware family.
+Patch and Bypass
+With the official Apache patch being released, 2.15.0-rc1 was initially reported to have fixed the CVE-2021-44228 vulnerability. However, a subsequent bypass was discovered. A newly released 2.15.0-rc2 version was in turn released, which protects users against this vulnerability.
+
+Conclusion
+The CVE-2021-44228 vulnerability is still being actively investigated in order to properly identify the full scope severity. Given the information currently available, this vulnerability may have a high impact at present and in the future. Most of the applications being affected are widely used in corporate networks as well as home networks. Users are encouraged to take all necessary steps to ensure they are protected against this vulnerability, as outlined below.
+
+Unit 42 is actively monitoring the abnormal traffic through our devices and cloud solutions. Palo Alto Networks provides protection against the exploitation of this vulnerability:
+
+Next-Generation Firewalls with a Threat Prevention security subscription can automatically block sessions related to this vulnerability using Threat ID 91991 (initially released using Applications and Threat content update version 8498 and further enhanced with version 8499). Additionally, attacker infrastructure is continuously being monitored and blocked.
+Cortex XDR customers running Linux agents and content 290-78377 are protected from a full exploitation chain using the Java Deserialization Exploit protection module. Other Cortex XDR customers are protected against various observed payloads stemming from CVE-2021-44228 through Behavioral Threat Protection (BTP). Additionally, Cortex XDR Pro customers using Analytics will have post-exploitation activities detected related to this vulnerability.
+Cortex XSOAR customers can leverage the  "CVE-2021-44228 - Log4j RCE'' pack to automatically detect and mitigate the vulnerability. Read more on the XSOAR marketplace.
+Prisma Cloud Compute Defender agents can detect whether any continuous integration (CI) project, container image, or host system maintains a vulnerable Log4j package or JAR file with a version equal to or older than 2.14.1.
+For users who rely on Snort or Suricata, the following rules have been released:
+
+2034647
+2034648
+2034648
+2034649
+2034650
+2034651
+2034652
+Customers of applications leveraging Apache log4j should upgrade to the newest version.
+
+Since the original patch was discovered to be bypassed, in the interest of implementing as many protections against this vulnerability as possible, the following mitigations are also recommended:
+
+Disable suspicious outbound traffic, such as LDAP and RMI on the server in PANW Firewall.
+Disable JNDI lookup.
+Remove the JndiLookup file in the log4j-core and restart the service.
+Setup spring.jndi.ignore=true
