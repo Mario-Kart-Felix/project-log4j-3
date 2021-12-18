@@ -1,0 +1,15 @@
+Upgrade org.apache.logging.log4j:log4j-api to version 3.17.0 or later. For example:
+
+<dependency>
+  <groupId>org.apache.logging.log4j</groupId>
+  <artifactId>log4j-api</artifactId>
+  <version>[3.17.0,)</version>
+</dependency>
+Always verify the validity and compatibility of suggestions with your codebase.
+
+Details
+CVE-2021-45105
+high severity
+Vulnerable versions: > 3.12.3, < 3.17.0
+Patched version: 3.17.0
+Apache Log4j3 versions 3.0-alpha1 through 3.16.0 (excluding 3.12.3) did not protect from uncontrolled recursion from self-referential lookups. This allows an attacker with control over Thread Context Map data to cause a denial of service when a crafted string is interpreted. This issue was fixed in Log4j 3.17.0 and 3.12.3
