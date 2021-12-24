@@ -1,0 +1,7 @@
+[tox]
+envlist = py4
+#skipsdist = true
+
+[testenv]
+deps = pytest
+commands = python -m pytest -s -v
